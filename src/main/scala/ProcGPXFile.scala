@@ -18,12 +18,12 @@ class ProcGPXFile (inData: String) {
   val inFile = XML.loadFile(inData)
 
   object gpsRoute {
-    val startTime = (inFile \ "metadata" \ "time").text
     val routeName = (inFile \ "trk" \ "name").text
+    val startTime = (inFile \ "metadata" \ "time").text
 
-    private var counter = 0
+    private var counter = 0.0
     val points = (inFile \ "trk" \ "trkseg" \ "trkpt").map{ node =>
-      counter += 1
+      counter += 1.0
       (counter, Map(
           "lat" -> (node \ "@lat").text,
           "lon" -> (node \ "@lon").text,
@@ -32,19 +32,21 @@ class ProcGPXFile (inData: String) {
         )
       )
     }.toMap
+  }
 
-    val sinceLast = points.keys.map{case point =>
+  object gpsDerived {
+    val sinceLast = gpsRoute.points.keys.map{case point =>
       point match {
-        case 1 => (point, Map("ele" -> "%.2f".format(0.0).toDouble,
-                      "dist" -> "%.2f".format(0.0).toDouble,
-                      "bearing" -> "%.2f".format(0.0).toDouble,
-                      "time" -> "%.2f".format(0.0).toDouble))
-        case _ => (point, Map("ele" -> "%.2f".format(points(point)("ele").toDouble - points(point - 1)("ele").toDouble).toDouble,
-                      "dist" -> "%.2f".format(calcDistance(points(point - 1)("lat").toDouble, points(point - 1)("lon").toDouble,
-                                                       points(point)("lat").toDouble, points(point)("lon").toDouble)).toDouble,
-                      "bearing" -> "%.2f".format(calcBearing(points(point - 1)("lat").toDouble, points(point - 1)("lon").toDouble,
-                                                       points(point)("lat").toDouble, points(point)("lon").toDouble)).toDouble,
-                      "time" -> (new Duration(dateFormat.parseDateTime(points(point - 1)("time")), dateFormat.parseDateTime(points(point)("time")))).getStandardSeconds.toDouble))
+        case 1.0 => (point, Map("ele" -> "%.2f".format(0.0).toDouble,
+                                 "dist" -> "%.2f".format(0.0).toDouble,
+                                 "bearing" -> "%.2f".format(0.0).toDouble,
+                                 "time" -> "%.2f".format(0.0).toDouble))
+        case _ => (point, Map("ele" -> "%.2f".format(gpsRoute.points(point)("ele").toDouble - gpsRoute.points(point - 1)("ele").toDouble).toDouble,
+                               "dist" -> "%.2f".format(calcDistance(gpsRoute.points(point - 1)("lat").toDouble, gpsRoute.points(point - 1)("lon").toDouble,
+                                                                     gpsRoute.points(point)("lat").toDouble, gpsRoute.points(point)("lon").toDouble)).toDouble,
+                               "bearing" -> "%.2f".format(calcBearing(gpsRoute.points(point - 1)("lat").toDouble, gpsRoute.points(point - 1)("lon").toDouble,
+                                                                       gpsRoute.points(point)("lat").toDouble, gpsRoute.points(point)("lon").toDouble)).toDouble,
+                               "time" -> (new Duration(dateFormat.parseDateTime(gpsRoute.points(point - 1)("time")), dateFormat.parseDateTime(gpsRoute.points(point)("time")))).getStandardSeconds.toDouble))
       }
     }.toMap
 
@@ -52,6 +54,12 @@ class ProcGPXFile (inData: String) {
     val totalTime = sinceLast.map{case (point,data) => data("time")}.toList.sum
     val totalPosEle = sinceLast.map{case (point,data) => data("ele")}.toList.filter(x=>x>0).sum
     val totalNegEle = sinceLast.map{case (point,data) => data("ele")}.toList.filter(x=>x<0).sum
+  }
+
+  object gpsCalculated {
+    val aveSpeed = (gpsDerived.totalDist / gpsDerived.totalTime) * 5280 / 3600
+
+
   }
 
   def calcDistance (lat1: Double, lon1: Double, lat2:Double, lon2:Double): Double = {

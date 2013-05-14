@@ -17,6 +17,11 @@ object CLI {
           (file:String, c:CLIConfig) =>
             c.copy(xmlFile = file)
         },
+        opt("c", "config", "TOML file for configuration" +
+          "\nDefault: %s".format(CLIConfigDefaults.tomlFile)){
+          (file:String, c:CLIConfig) =>
+            c.copy(tomlFile = file)
+        },
         help("h", "help", "This help message.")
       )
     }
@@ -26,11 +31,11 @@ object CLI {
 
       println(gpsData.gpsRoute.routeName,
                gpsData.gpsRoute.startTime,
-               gpsData.gpsRoute.totalDist,
-               gpsData.gpsRoute.totalTime,
-               gpsData.gpsRoute.totalPosEle,
-               gpsData.gpsRoute.totalNegEle)
-      (1 until 100).foreach{i => println(gpsData.gpsRoute.points(i),gpsData.gpsRoute.sinceLast(i))}
+               gpsData.gpsDerived.totalDist,
+               gpsData.gpsDerived.totalTime,
+               gpsData.gpsDerived.totalPosEle,
+               gpsData.gpsDerived.totalNegEle)
+      (1 until 100).foreach{i => println(gpsData.gpsRoute.points(i),gpsData.gpsDerived.sinceLast(i))}
 
     }
   }
