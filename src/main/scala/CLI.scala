@@ -13,9 +13,9 @@ object CLI {
     val parser = new OptionParser[CLIConfig]("CLI", "0.1") {
       def options = Seq(
         arg("xmlFile", "File for processing." +
-          "\nDefault: %s".format(CLIConfigDefaults.xmlFile)){
+          "\nDefault: %s".format(CLIConfigDefaults.gpsFile)){
           (file:String, c:CLIConfig) =>
-            c.copy(xmlFile = file)
+            c.copy(gpsFile = file)
         },
         opt("b", "bikeStyle", "Style of bike" +
           "\nDefault: %s".format(CLIConfigDefaults.bikeStyle)){
@@ -37,8 +37,8 @@ object CLI {
     }
 
     parser.parse(args, CLIConfig()) map { config =>
-      val gpsData = new ProcGPXFile(config.xmlFile)
       val rideData = new RideConfig(config)
+      val gpsData = new ProcGPXFile(rideData)
       println(rideData.riderData.name, rideData.riderData.age, rideData.riderData.weight)
       println(rideData.bikeData.bike, rideData.bikeData.weight)
       println(gpsData.gpsRoute.routeName,
@@ -46,8 +46,11 @@ object CLI {
                gpsData.gpsDerived.totalDist,
                gpsData.gpsDerived.totalTime,
                gpsData.gpsDerived.totalPosEle,
-               gpsData.gpsDerived.totalNegEle)
-      (1 until 10).foreach{i => println(gpsData.gpsRoute.points(i),gpsData.gpsDerived.sinceLast(i))}
+               gpsData.gpsDerived.totalNegEle,
+               gpsData.gpsCalculated.aveSpeed)
+      gpsData.gpsDerived.sinceLast
+        .filter{case (k,v) => v("time")>30.0}
+        .foreach{case (k,v) => {println(v);println(gpsData.gpsRoute.points(k))}}
 
     }
   }

@@ -8,13 +8,13 @@
 case class CLIConfig (
   bikeStyle: String = CLIConfigDefaults.bikeStyle,
   rideStyle: String = CLIConfigDefaults.rideStyle,
-  xmlFile: String = CLIConfigDefaults.xmlFile,
+  gpsFile: String = CLIConfigDefaults.gpsFile,
   tomlFile: String = CLIConfigDefaults.tomlFile
 )
 
 object CLIConfigDefaults {
   val bikeStyle = "road"
   val rideStyle = "extended"
-  val xmlFile = "/home/babrams/Dropbox/CyclingRoutesGPX/Leucadian20_20130504.gpx"
+  val gpsFile = "/home/babrams/Dropbox/CyclingRoutesGPX/Leucadian20_20130504.gpx"
   val tomlFile = "/home/babrams/repo/GPSAnalysis/src/resources/RiderData.toml"
 }

@@ -10,9 +10,14 @@ import com.axelarge.tomelette._
 import java.io.FileReader
 
 class RideConfig (config: CLIConfig) {
+  val gpsFile = config.gpsFile
+  val rideStyle = config.rideStyle
+  val bikeStyle = config.bikeStyle
+
+  private val tomlFile = config.tomlFile
   private val parser = new TomlParser()
   private val tomlConfig = try {
-    parser.parse(new FileReader(config.tomlFile)).right.get
+    parser.parse(new FileReader(tomlFile)).right.get
   } catch {
     case e:NoSuchElementException =>
       throw new Exception("Error parsing config file. Either does not exist or is not properly formatted.")
@@ -20,44 +25,44 @@ class RideConfig (config: CLIConfig) {
 
   object bikeData {
     val bike = try {
-      tomlConfig.getAs[String]("bike."+config.bikeStyle+".year").get.replaceAll("\"","") + " " + tomlConfig.getAs[String]("bike."+config.bikeStyle+".brand").get.replaceAll("\"","") + " " + tomlConfig.getAs[String]("bike."+config.bikeStyle+".model").get.replaceAll("\"","")
+      tomlConfig.getAs[String]("bike."+bikeStyle+".year").get.replaceAll("\"","") + " " + tomlConfig.getAs[String]("bike."+bikeStyle+".brand").get.replaceAll("\"","") + " " + tomlConfig.getAs[String]("bike."+bikeStyle+".model").get.replaceAll("\"","")
     } catch {
       case e: Exception => throw new Exception("Could not extract bike name components")
     }
     val weight = try {
-      tomlConfig.getAs[String]("bike."+config.bikeStyle+".weight").get.replaceAll("\"","").toLong + tomlConfig.getAs[String]("accessories."+config.rideStyle+".weight").get.replaceAll("\"","").toLong
+      tomlConfig.getAs[String]("bike."+bikeStyle+".weight").get.replaceAll("\"","").toLong + tomlConfig.getAs[String]("accessories."+rideStyle+".weight").get.replaceAll("\"","").toLong
     } catch {
-      case e: Exception => throw new Exception("Could not extract bike."+config.bikeStyle+".weight")
+      case e: Exception => throw new Exception("Could not extract bike."+bikeStyle+".weight")
     }
     val wheel = try {
-      tomlConfig.getAs[String]("bike."+config.bikeStyle+".wheel").get.replaceAll("\"","").toLong
+      tomlConfig.getAs[String]("bike."+bikeStyle+".wheel").get.replaceAll("\"","").toLong
     } catch {
-      case e: Exception => throw new Exception("Could not extract bike."+config.bikeStyle+".wheel")
+      case e: Exception => throw new Exception("Could not extract bike."+bikeStyle+".wheel")
     }
     val tire = try {
-      tomlConfig.getAs[String]("bike."+config.bikeStyle+".tire").get.replaceAll("\"","").toLong
+      tomlConfig.getAs[String]("bike."+bikeStyle+".tire").get.replaceAll("\"","").toLong
     } catch {
-      case e: Exception => throw new Exception("Could not extract bike."+config.bikeStyle+".tire")
+      case e: Exception => throw new Exception("Could not extract bike."+bikeStyle+".tire")
     }
     val crankLength = try {
-      tomlConfig.getAs[String]("bike."+config.bikeStyle+".crank").get.replaceAll("\"","").toLong
+      tomlConfig.getAs[String]("bike."+bikeStyle+".crank").get.replaceAll("\"","").toLong
     } catch {
-      case e: Exception => throw new Exception("Could not extract bike."+config.bikeStyle+".crank")
+      case e: Exception => throw new Exception("Could not extract bike."+bikeStyle+".crank")
     }
     val crankset = try {
-      tomlConfig.getAs[List[String]]("bike."+config.bikeStyle+".crankset").get.map(_.replaceAll("\"","").toLong)
+      tomlConfig.getAs[List[String]]("bike."+bikeStyle+".crankset").get.map(_.replaceAll("\"","").toLong)
     } catch {
-      case e: Exception => throw new Exception("Could not extract bike."+config.bikeStyle+".crankset")
+      case e: Exception => throw new Exception("Could not extract bike."+bikeStyle+".crankset")
     }
     val cassette = try {
-      tomlConfig.getAs[List[String]]("bike."+config.bikeStyle+".cassette").get.map(_.replaceAll("\"","").toLong)
+      tomlConfig.getAs[List[String]]("bike."+bikeStyle+".cassette").get.map(_.replaceAll("\"","").toLong)
     } catch {
-      case e: Exception => throw new Exception("Could not extract bike."+config.bikeStyle+".cassette")
+      case e: Exception => throw new Exception("Could not extract bike."+bikeStyle+".cassette")
     }
     val accessories = try {
-      tomlConfig.getAs[List[String]]("accessories."+config.rideStyle+".items").get.map(_.replaceAll("\"",""))
+      tomlConfig.getAs[List[String]]("accessories."+rideStyle+".items").get.map(_.replaceAll("\"",""))
     } catch {
-      case e: Exception => throw new Exception("Could not extract accessories."+config.rideStyle+".items")
+      case e: Exception => throw new Exception("Could not extract accessories."+rideStyle+".items")
     }
   }
 

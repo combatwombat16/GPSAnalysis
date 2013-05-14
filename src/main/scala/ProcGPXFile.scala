@@ -11,11 +11,11 @@ import scala.math.{toRadians, toDegrees}
 import org.joda.time.Duration
 import org.joda.time.format.DateTimeFormat
 
-class ProcGPXFile (inData: String) {
+class ProcGPXFile (config: RideConfig) {
   val dateTimePattern = "YYYY-MM-dd'T'HH:mm:ssZ"
   val dateFormat = DateTimeFormat.forPattern(dateTimePattern)
 
-  val inFile = XML.loadFile(inData)
+  val inFile = XML.loadFile(config.gpsFile)
 
   object gpsRoute {
     val routeName = (inFile \ "trk" \ "name").text
@@ -33,7 +33,7 @@ class ProcGPXFile (inData: String) {
       )
     }.toMap
   }
-
+  //TODO: Add corrections for stops > 30 seconds.  Possibly figure distance and speed of surrounding points, average and interpolate.
   object gpsDerived {
     val sinceLast = gpsRoute.points.keys.map{case point =>
       point match {
@@ -57,7 +57,7 @@ class ProcGPXFile (inData: String) {
   }
 
   object gpsCalculated {
-    val aveSpeed = (gpsDerived.totalDist / gpsDerived.totalTime) * 5280 / 3600
+    val aveSpeed = (gpsDerived.totalDist / gpsDerived.totalTime) / 5280 * 60 * 60
 
 
   }
@@ -90,6 +90,6 @@ class ProcGPXFile (inData: String) {
 }
 
 object ProcGPXFile {
-  def apply(inData: String) =
-    new ProcGPXFile(inData)
+  def apply(config: RideConfig) =
+    new ProcGPXFile(config)
 }
