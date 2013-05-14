@@ -2,19 +2,29 @@ title = "Rider Configuration"
 
 #weight in lbs, age in years, height in inches
 [rider]
-name    = "Ben"
-age     = 28
-weight  = 165
-height  = 67
+name="Ben"
+age="28"
+weight="165"
+height="67"
 
-#weight in lbs, gear in teeth, diameters in mm
+#weight in lbs, gear in teeth, diameter in mm
 [bike.road]
-brand   = "Fuji"
-model   = "Newest 3.0"
-year    = "2012"
-weight  = 24
-crank   = 170
-chainrings = [30,42,52]
-casette = [12,13,15,17,19,21,23,25]
-wheel   = 700
-tire    = 25
+brand="Fuji"
+model="Newest 3.0"
+year="2012"
+weight="24"
+crank="170"
+crankset=["30","42","52"]
+cassette=["12","13","15","17","19","21","23","25"]
+wheel="700"
+tire="25"
+
+#weight in lbs
+[accessories.base]
+items=["rack", "tubes", "tools", "lights", "water", "pump"]
+weight="10"
+
+#weight in lbs
+[accessories.extended]
+items=["rack", "tubes", "tools", "lights", "water", "pump", "pannier"]
+weight="20"

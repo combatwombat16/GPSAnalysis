@@ -17,6 +17,16 @@ object CLI {
           (file:String, c:CLIConfig) =>
             c.copy(xmlFile = file)
         },
+        opt("b", "bikeStyle", "Style of bike" +
+          "\nDefault: %s".format(CLIConfigDefaults.bikeStyle)){
+          (bike:String, c:CLIConfig) =>
+            c.copy(rideStyle = bike)
+        },
+        opt("r", "rideStyle", "Style of ride" +
+          "\nDefault: %s".format(CLIConfigDefaults.rideStyle)){
+          (ride:String, c:CLIConfig) =>
+            c.copy(rideStyle = ride)
+        },
         opt("c", "config", "TOML file for configuration" +
           "\nDefault: %s".format(CLIConfigDefaults.tomlFile)){
           (file:String, c:CLIConfig) =>
@@ -28,14 +38,16 @@ object CLI {
 
     parser.parse(args, CLIConfig()) map { config =>
       val gpsData = new ProcGPXFile(config.xmlFile)
-
+      val rideData = new RideConfig(config)
+      println(rideData.riderData.name, rideData.riderData.age, rideData.riderData.weight)
+      println(rideData.bikeData.bike, rideData.bikeData.weight)
       println(gpsData.gpsRoute.routeName,
                gpsData.gpsRoute.startTime,
                gpsData.gpsDerived.totalDist,
                gpsData.gpsDerived.totalTime,
                gpsData.gpsDerived.totalPosEle,
                gpsData.gpsDerived.totalNegEle)
-      (1 until 100).foreach{i => println(gpsData.gpsRoute.points(i),gpsData.gpsDerived.sinceLast(i))}
+      (1 until 10).foreach{i => println(gpsData.gpsRoute.points(i),gpsData.gpsDerived.sinceLast(i))}
 
     }
   }
