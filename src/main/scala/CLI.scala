@@ -41,6 +41,10 @@ object CLI {
       val gpsData = new ProcGPXFile(rideData)
       println(rideData.riderData.name, rideData.riderData.age, rideData.riderData.weight)
       println(rideData.bikeData.bike, rideData.bikeData.weight)
+      /*gpsData.gpsDerived.sinceLast.keys.toList.sorted.foreach{x => println(x,
+              gpsData.gpsDerived.sinceLast(x)("ele"),
+              gpsData.gpsDerived.sinceLast(x)("dist"),
+              gpsData.gpsDerived.sinceLast(x)("time"))}*/
       println(gpsData.gpsRoute.routeName,
                gpsData.gpsRoute.startTime,
                gpsData.gpsDerived.totalDist,
@@ -49,7 +53,7 @@ object CLI {
                gpsData.gpsDerived.totalNegEle,
                gpsData.gpsCalculated.aveSpeed)
       gpsData.gpsDerived.sinceLast
-        .filter{case (k,v) => v("time")>30.0}
+        .filter{case (k,v) => v("time")>=30.0}
         .foreach{case (k,v) => {println(v);println(gpsData.gpsRoute.points(k))}}
 
     }

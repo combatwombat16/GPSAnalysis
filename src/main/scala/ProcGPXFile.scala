@@ -19,7 +19,7 @@ class ProcGPXFile (config: RideConfig) {
 
   object gpsRoute {
     val routeName = (inFile \ "trk" \ "name").text
-    val startTime = (inFile \ "metadata" \ "time").text
+    val startTime = (inFile \ "trk" \ "time").text
 
     private var counter = 0.0
     val points = (inFile \ "trk" \ "trkseg" \ "trkpt").map{ node =>
@@ -34,8 +34,9 @@ class ProcGPXFile (config: RideConfig) {
     }.toMap
   }
   //TODO: Add corrections for stops > 30 seconds.  Possibly figure distance and speed of surrounding points, average and interpolate.
+  // Set a simple check if time > 30, set to 30
   object gpsDerived {
-    val sinceLast = gpsRoute.points.keys.map{case point =>
+    val sinceLast: Map[Double,Map[String, Double]] = gpsRoute.points.keys.toList.sorted.map{case point =>
       point match {
         case 1.0 => (point, Map("ele" -> "%.2f".format(0.0).toDouble,
                                  "dist" -> "%.2f".format(0.0).toDouble,
@@ -46,7 +47,13 @@ class ProcGPXFile (config: RideConfig) {
                                                                      gpsRoute.points(point)("lat").toDouble, gpsRoute.points(point)("lon").toDouble)).toDouble,
                                "bearing" -> "%.2f".format(calcBearing(gpsRoute.points(point - 1)("lat").toDouble, gpsRoute.points(point - 1)("lon").toDouble,
                                                                        gpsRoute.points(point)("lat").toDouble, gpsRoute.points(point)("lon").toDouble)).toDouble,
-                               "time" -> (new Duration(dateFormat.parseDateTime(gpsRoute.points(point - 1)("time")), dateFormat.parseDateTime(gpsRoute.points(point)("time")))).getStandardSeconds.toDouble))
+                               "time" -> {(new Duration(dateFormat.parseDateTime(gpsRoute.points(point - 1)("time")), dateFormat.parseDateTime(gpsRoute.points(point)("time")))).getStandardSeconds.toDouble match {
+                                              case x if x < 60.0 => x
+                                              case _ => 30.0
+                                            }
+                                         }
+                              )
+                  )
       }
     }.toMap
 
@@ -58,12 +65,10 @@ class ProcGPXFile (config: RideConfig) {
 
   object gpsCalculated {
     val aveSpeed = (gpsDerived.totalDist / gpsDerived.totalTime) / 5280 * 60 * 60
-
-
   }
 
   def calcDistance (lat1: Double, lon1: Double, lat2:Double, lon2:Double): Double = {
-    val R = 6371; // km
+    val R = 6371 // km
     val dLat = (lat2 - lat1).toRadians
     val dLon = (lon2 - lon1).toRadians
     val lat1rad = lat1.toRadians
@@ -72,11 +77,11 @@ class ProcGPXFile (config: RideConfig) {
     val a = Math.sin(dLat/2) * Math.sin(dLat/2) +
       Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1rad) * Math.cos(lat2rad)
     val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
-    return R * c * 3280.84
+    if(R * c * 3280.84 > 10000) 1.0 else R * c * 3280.84
   }
 
   def calcBearing (lat1: Double, lon1: Double, lat2:Double, lon2:Double): Double = {
-    val R = 6371; // km
+    val R = 6371 // km
     val dLat = (lat2 - lat1).toRadians
     val dLon = (lon2 - lon1).toRadians
     val lat1rad = lat1.toRadians
@@ -85,7 +90,7 @@ class ProcGPXFile (config: RideConfig) {
     val y = Math.sin(dLon) * Math.cos(lat2rad)
     val x = Math.cos(lat1rad)*Math.sin(lat2rad) -
       Math.sin(lat1rad)*Math.cos(lat2rad)*Math.cos(dLon)
-    return Math.atan2(y, x).toDegrees
+    Math.atan2(y, x).toDegrees
   }
 }
 
